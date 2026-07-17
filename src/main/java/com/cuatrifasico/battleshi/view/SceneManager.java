@@ -48,7 +48,8 @@ public final class SceneManager {
      * Loads application-specific custom fonts from the classpath.
      */
     public void loadFonts() {
-        // Font.loadFont(getClass().getResourceAsStream("/fonts/FontName.otf"), 14);
+        Font.loadFont(getClass().getResourceAsStream("/fonts/BDOGrotesk-VF.ttf"), 14);
+        Font.loadFont(getClass().getResourceAsStream("/fonts/SF-Pro.ttf"), 14);
     }
 
     /**

@@ -1,0 +1,184 @@
+.root {
+    /* Variables */
+    -fx-primary-color: #3FC7E9;
+    -fx-secondary-color: #268AAC;
+    -fx-tertiary-color: #0FAED6;
+    -fx-text-primary-color: white;
+    -fx-text-secondary-color: #334460;
+
+    -fx-accent-red: #FF5151;
+    -fx-accent-dark-red: #C93636;
+    -fx-accent-cyan: #00FFF7;
+    -fx-gray: #425E70;
+    -fx-dark-gray: #324551;
+
+    -fx-bg-color: -fx-secondary-color;
+
+    -fx-background-color: -fx-bg-color;
+    -fx-font-family: "BDO Grotesk", sans-serif;
+}
+
+/* ---- Board header bars ------------------------------------------------ */
+
+.board-title-bar {
+    -fx-background-radius: 8;
+    -fx-padding: 6 0 6 0;
+    -fx-alignment: center;
+}
+
+.board-title-bar.player-side {
+    -fx-background-color: -fx-primary-color;
+}
+
+.board-title-bar.opponent-side {
+    -fx-background-color: -fx-accent-dark-red;
+}
+
+.board-title-bar.label {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-secondary-color;
+}
+
+.board-title-bar.opponent-side.label {
+    -fx-text-fill: -fx-text-primary-color;
+}
+
+/* ---- Coordinate header labels (A-J / 1-10) ---------------------------- */
+
+.board-header-label {
+    -fx-text-fill: -fx-text-primary-color;
+    -fx-font-size: 14px;
+    -fx-font-weight: normal;
+}
+
+/* ---- Board background & cells ----------------------------------------- */
+
+.board-background {
+    -fx-fill: -fx-bg-color;
+}
+
+.cell-water {
+    -fx-fill: -fx-primary-color;
+}
+
+.cell-water:hover {
+    -fx-fill: -fx-tertiary-color;
+    -fx-cursor: hand;
+}
+
+.cell-highlight-valid {
+    -fx-fill: -fx-accent-cyan;
+}
+
+.cell-highlight-invalid {
+    -fx-fill: -fx-accent-red;
+}
+
+/* ---- Ship fills --------------------------------------------------------- */
+
+.ship-body {
+    -fx-fill: -fx-gray;
+}
+
+.ship-sunk {
+    -fx-fill: -fx-accent-dark-red;
+}
+
+.ship-shadow {
+    -fx-opacity: 0.35;
+}
+
+.ship-hit-dot {
+    -fx-fill: -fx-dark-gray;
+}
+
+/* ---- Shot markers -------------------------------------------------------- */
+
+.marker-hit {
+    -fx-fill: -fx-accent-red;
+}
+
+.marker-miss {
+    -fx-stroke: -fx-text-primary-color;
+}
+
+/* ---- Divider between the two boards ------------------------------------ */
+
+.board-divider {
+    -fx-stroke: -fx-tertiary-color;
+    -fx-stroke-width: 4;
+    -fx-stroke-line-cap: round;
+    -fx-opacity: 0.6;
+}
+
+/* ---- Circular icon buttons (restart, play, view, exit) ---------------- */
+
+.icon-button {
+    -fx-background-color: -fx-text-primary-color;
+    -fx-font-family: "SF Pro";
+    -fx-font-size: 24;
+    -fx-font-weight: 900;
+    -fx-background-radius: 16;
+    -fx-min-width: 80;
+    -fx-min-height: 66;
+    -fx-max-width: 80;
+    -fx-max-height: 66;
+    -fx-cursor: hand;
+}
+
+.icon-button {
+    -fx-text-fill: -fx-text-secondary-color;
+}
+
+.icon-button:disabled {
+    -fx-background-color: -fx-tertiary-color;
+    -fx-text-fill: -fx-bg-color;
+    -fx-cursor: default;
+}
+
+.icon-button:hover {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: -fx-text-primary-color;
+}
+
+/* ---- Placed fleet shadow tray (below player board) --------------------- */
+
+.fleet-tray {
+    -fx-background-color: transparent;
+}
+
+/* ---- Overlay panels (instructions / win-lose) -------------------------- */
+
+.overlay-scrim {
+    -fx-background-color: rgba(4, 18, 32, 0.72);
+}
+
+.overlay-card {
+    -fx-background-color: -fx-bg-color;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: -fx-primary-color;
+    -fx-border-width: 2;
+    -fx-padding: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 20, 0, 0, 6);
+}
+
+.overlay-card .title-label {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-primary-color;
+}
+
+.primary-button {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: -fx-text-primary-color;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 10 28 10 28;
+    -fx-cursor: hand;
+}
+
+.primary-button:hover {
+    -fx-background-color: -fx-tertiary-color;
+}
