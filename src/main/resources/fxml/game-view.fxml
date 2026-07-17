@@ -39,10 +39,10 @@
             <Label fx:id="opponentNicknameLabel" text="OPPONENT" styleClass="board-title-bar, opponent-side" maxWidth="Infinity"/>
             <Pane fx:id="opponentBoardContainer"/>
             <HBox alignment="CENTER" spacing="12" prefHeight="94">
-                <Button fx:id="restartButton" text="&#x21BA;" styleClass="icon-button"/>
-                <Button fx:id="playButton" text="&#x25B6;" styleClass="icon-button" disable="true"/>
-                <Button fx:id="viewEnemyButton" text="&#x1F441;" styleClass="icon-button"/>
-                <Button fx:id="exitButton" text="&#x2192;" styleClass="icon-button"/>
+                <Button fx:id="restartButton" text="􀅈" styleClass="icon-button"/>
+                <Button fx:id="playButton" text="􀊄" styleClass="icon-button" disable="true"/>
+                <Button fx:id="viewEnemyButton" text="􀋭" styleClass="icon-button"/>
+                <Button fx:id="exitButton" text="􀻵" styleClass="icon-button"/>
             </HBox>
         </VBox>
     </HBox>
