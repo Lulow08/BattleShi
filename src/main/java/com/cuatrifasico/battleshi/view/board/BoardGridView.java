@@ -1,6 +1,7 @@
 package com.cuatrifasico.battleshi.view.board;
 
 import com.cuatrifasico.battleshi.model.entities.Coordinate;
+import com.cuatrifasico.battleshi.view.board.BoardTheme;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -37,6 +38,7 @@ public final class BoardGridView {
     private final Pane rootPane;
     private final Pane overlayLayer;
     private final Rectangle[][] cellRectangles;
+    private Rectangle turnIndicator;
 
     /**
      * Builds a new board grid view.
@@ -52,6 +54,7 @@ public final class BoardGridView {
         buildBackground();
         buildHeaders();
         buildCells();
+        buildTurnIndicator();
 
         rootPane.getChildren().add(overlayLayer);
     }
@@ -175,6 +178,43 @@ public final class BoardGridView {
         cell.setArcHeight(BoardTheme.CELL_ARC);
         cell.getStyleClass().add(BoardTheme.CLASS_CELL_WATER);
         return cell;
+    }
+
+    /**
+     * Builds the (initially inactive) border drawn around the 10x10
+     * cell block to signal whose turn it is. It sits outside the grid
+     * by {@link BoardTheme#TURN_INDICATOR_MARGIN} on every side, and
+     * stops short of the coordinate headers rather than surrounding
+     * them, per the reference design.
+     */
+    private void buildTurnIndicator() {
+        double margin = BoardTheme.TURN_INDICATOR_MARGIN;
+        double size = Coordinate.BOARD_SIZE * BoardTheme.CELL_SIZE + 2 * margin;
+
+        turnIndicator = new Rectangle(size, size);
+        turnIndicator.setArcWidth(BoardTheme.CELL_ARC * 2);
+        turnIndicator.setArcHeight(BoardTheme.CELL_ARC * 2);
+        turnIndicator.setLayoutX(HEADER_SIZE - margin);
+        turnIndicator.setLayoutY(HEADER_SIZE - margin);
+        turnIndicator.setMouseTransparent(true);
+        turnIndicator.getStyleClass().add(BoardTheme.CLASS_TURN_INDICATOR);
+
+        rootPane.getChildren().add(turnIndicator);
+    }
+
+    /**
+     * Toggles this board's turn-indicator border on or off. Intended
+     * to be called by the controller whenever the active player
+     * changes, so it can freely switch the highlight between the
+     * player's and the opponent's {@link BoardGridView} instances.
+     *
+     * @param active {@code true} to show the border, {@code false} to hide it.
+     */
+    public void setTurnIndicatorActive(boolean active) {
+        turnIndicator.getStyleClass().removeAll(BoardTheme.CLASS_TURN_INDICATOR_ACTIVE);
+        if (active) {
+            turnIndicator.getStyleClass().add(BoardTheme.CLASS_TURN_INDICATOR_ACTIVE);
+        }
     }
 
     /**

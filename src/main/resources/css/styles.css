@@ -35,7 +35,7 @@
 }
 
 .board-title-bar.label {
-    -fx-font-size: 15px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-text-fill: -fx-secondary-color;
 }
@@ -109,7 +109,24 @@
     -fx-stroke: -fx-tertiary-color;
     -fx-stroke-width: 4;
     -fx-stroke-line-cap: round;
-    -fx-opacity: 0.6;
+}
+
+/* ---- Turn indicator (toggled by the controller between players) -------- */
+
+.turn-indicator {
+    -fx-fill: transparent;
+    -fx-stroke: transparent;
+    -fx-stroke-width: 3;
+}
+
+.turn-indicator-active {
+    -fx-stroke: -fx-text-primary-color;
+}
+
+.board-title-bar.turn-active {
+    -fx-border-color: -fx-text-primary-color;
+    -fx-border-width: 3;
+    -fx-border-radius: 8;
 }
 
 /* ---- Circular icon buttons (restart, play, view, exit) ---------------- */
@@ -181,4 +198,33 @@
 
 .primary-button:hover {
     -fx-background-color: -fx-tertiary-color;
+}
+
+/* ---- Main menu ----------------------------------------------------------- */
+
+.menu-title {
+    -fx-font-size: 52px;
+    -fx-font-weight: 900;
+    -fx-text-fill: -fx-text-primary-color;
+}
+
+.menu-button {
+    -fx-background-color: -fx-text-primary-color;
+    -fx-text-fill: -fx-text-secondary-color;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-cursor: hand;
+    -fx-pref-height: 54;
+}
+
+.menu-button:hover {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: -fx-text-primary-color;
+}
+
+.menu-button:disabled {
+    -fx-background-color: -fx-tertiary-color;
+    -fx-text-fill: -fx-bg-color;
+    -fx-cursor: default;
 }

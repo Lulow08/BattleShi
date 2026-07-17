@@ -38,10 +38,13 @@ public final class BoardTheme {
     /** Spacing (horizontal and vertical) between ship entries in the fleet tray. */
     public static final double TRAY_SHIP_SPACING = 10;
 
+    /** Margin between the 10x10 grid block and the turn-indicator border around it. */
+    public static final double TURN_INDICATOR_MARGIN = 4;
+
     // ---- Marker geometry ------------------------------------------------
-    public static final double HIT_DOT_RADIUS = CELL_SIZE * 0.18;
-    public static final double HIT_MARKER_RADIUS = CELL_SIZE * 0.24;
-    public static final double MISS_ARM_LENGTH = CELL_SIZE * 0.15;
+    public static final double HIT_DOT_RADIUS = CELL_SIZE * 0.16;
+    public static final double HIT_MARKER_RADIUS = CELL_SIZE * 0.27;
+    public static final double MISS_ARM_LENGTH = CELL_SIZE * 0.16;
     public static final double MISS_STROKE_WIDTH = CELL_SIZE * 0.12;
 
     // ---- CSS style class names ------------------------------------------
@@ -55,4 +58,6 @@ public final class BoardTheme {
     public static final String CLASS_SHIP_HIT_DOT = "ship-hit-dot";
     public static final String CLASS_MARKER_HIT = "marker-hit";
     public static final String CLASS_MARKER_MISS = "marker-miss";
+    public static final String CLASS_TURN_INDICATOR = "turn-indicator";
+    public static final String CLASS_TURN_INDICATOR_ACTIVE = "turn-indicator-active";
 }

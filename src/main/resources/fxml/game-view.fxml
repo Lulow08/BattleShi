@@ -36,18 +36,18 @@
 
         <!-- Opponent side -->
         <VBox alignment="TOP_CENTER" spacing="10">
-            <Label text="OPPONENT" styleClass="board-title-bar, opponent-side" maxWidth="Infinity"/>
+            <Label fx:id="opponentNicknameLabel" text="OPPONENT" styleClass="board-title-bar, opponent-side" maxWidth="Infinity"/>
             <Pane fx:id="opponentBoardContainer"/>
             <HBox alignment="CENTER" spacing="12" prefHeight="94">
-                <Button fx:id="restartButton" text="􀅈" styleClass="icon-button"/>
-                <Button fx:id="playButton" text="􀊄" styleClass="icon-button" disable="true"/>
-                <Button fx:id="viewEnemyButton" text="􀋭" styleClass="icon-button"/>
-                <Button fx:id="exitButton" text="􀻵" styleClass="icon-button"/>
+                <Button fx:id="restartButton" text="&#x21BA;" styleClass="icon-button"/>
+                <Button fx:id="playButton" text="&#x25B6;" styleClass="icon-button" disable="true"/>
+                <Button fx:id="viewEnemyButton" text="&#x1F441;" styleClass="icon-button"/>
+                <Button fx:id="exitButton" text="&#x2192;" styleClass="icon-button"/>
             </HBox>
         </VBox>
     </HBox>
 
-    <!-- Instructions overlay - shown at game start -->
+    <!-- Instructions overlay, shown at game start -->
     <StackPane fx:id="instructionsOverlay" styleClass="overlay-scrim">
         <VBox styleClass="overlay-card" alignment="CENTER" spacing="16" maxWidth="520" maxHeight="420">
             <Label text="How to play" styleClass="title-label"/>
@@ -57,7 +57,7 @@
         </VBox>
     </StackPane>
 
-    <!-- Win / lose overlay - hidden until the match ends -->
+    <!-- Win / lose overlay, hidden until the match ends -->
     <StackPane fx:id="resultOverlay" styleClass="overlay-scrim" visible="false" managed="false">
         <VBox styleClass="overlay-card" alignment="CENTER" spacing="18" maxWidth="420" maxHeight="260">
             <Label fx:id="resultTitleLabel" text="YOU WON" styleClass="title-label"/>
