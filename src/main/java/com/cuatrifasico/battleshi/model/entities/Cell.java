@@ -68,6 +68,16 @@ public final class Cell implements Serializable {
     }
 
     /**
+     * Clears this cell back to empty, unshot water. Used by the
+     * placement phase when picking up an already-placed ship to move
+     * it elsewhere, and by the "restart placement" action.
+     */
+    public void clear() {
+        this.occupyingShip = null;
+        this.state = CellState.WATER;
+    }
+
+    /**
      * @return {@code true} if this cell has already been fired upon
      *         (i.e. its state is neither {@link CellState#WATER} nor {@link CellState#SHIP}).
      */

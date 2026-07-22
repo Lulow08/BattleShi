@@ -11,7 +11,9 @@ import java.io.IOException;
 public class AppInitializer {
 
     private static final String APP_TITLE   = "Battle Shi";
-    private static final String ENTRY_SCENE = "game-view.fxml";
+    // Was "game-view.fxml", which skipped the main menu (and therefore
+    // "Continue Game") entirely. The real entry point is the menu.
+    private static final String ENTRY_SCENE = "menu-view.fxml";
 
     /**
      * Configures the window parameters, registers the scene infrastructure, and sets the initial view.

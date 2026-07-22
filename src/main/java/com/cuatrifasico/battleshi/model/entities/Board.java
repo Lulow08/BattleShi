@@ -81,6 +81,42 @@ public final class Board implements Serializable {
     }
 
     /**
+     * Removes a previously placed ship from the board: clears every cell
+     * it occupied back to water and drops it from the fleet. Used by the
+     * placement phase to "pick up" a ship before moving it elsewhere,
+     * and to fully reset the board.
+     *
+     * @param ship The ship to remove; must currently belong to this board's fleet.
+     */
+    public void removeShip(Ship ship) {
+        for (Coordinate coordinate : ship.getOccupiedCells()) {
+            getCell(coordinate).clear();
+        }
+        fleet.remove(ship);
+    }
+
+    /**
+     * Non-mutating check for whether a ship of the given type could be
+     * placed at the given head/orientation right now, without actually
+     * placing it. Used by the placement phase to preview valid/invalid
+     * drop targets as the player hovers the board.
+     *
+     * @param shipType    The ship type to test.
+     * @param head        The candidate head coordinate.
+     * @param orientation The candidate orientation.
+     * @return {@code true} if {@link #placeShip} would currently succeed
+     *         with these exact arguments.
+     */
+    public boolean canPlace(ShipType shipType, Coordinate head, Orientation orientation) {
+        try {
+            validatePlacement(projectCells(shipType, head, orientation));
+            return true;
+        } catch (InvalidPlacementException e) {
+            return false;
+        }
+    }
+
+    /**
      * Projects the list of coordinates a ship of the given type and
      * orientation would occupy, starting from its head cell.
      *
