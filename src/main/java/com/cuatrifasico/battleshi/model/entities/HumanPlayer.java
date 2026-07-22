@@ -18,4 +18,16 @@ public final class HumanPlayer extends Player {
     public HumanPlayer(String nickname) {
         super(nickname);
     }
+
+    /**
+     * Creates the human player wrapped around a board that was already
+     * built and populated during the placement phase (see
+     * {@link Player#Player(String, Board)}).
+     *
+     * @param nickname The display name chosen by the user.
+     * @param ownBoard The player's board, already carrying their fleet.
+     */
+    public HumanPlayer(String nickname, Board ownBoard) {
+        super(nickname, ownBoard);
+    }
 }
