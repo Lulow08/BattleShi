@@ -17,7 +17,7 @@
     <!-- Main game content -->
     <HBox alignment="TOP_CENTER" spacing="26">
         <padding>
-            <javafx.geometry.Insets top="40" right="40" bottom="40" left="40"/>
+            <javafx.geometry.Insets top="26" right="26" bottom="26" left="26"/>
         </padding>
 
         <!-- Player side -->

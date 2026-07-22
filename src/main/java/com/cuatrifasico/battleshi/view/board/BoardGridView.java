@@ -34,6 +34,8 @@ import javafx.scene.shape.Rectangle;
 public final class BoardGridView {
 
     private static final double HEADER_SIZE = 20;
+    private static final double HEADER_GRID_GAP = 8;
+    private static final double GRID_ORIGIN = HEADER_SIZE + HEADER_GRID_GAP;
 
     private final Pane rootPane;
     private final Pane overlayLayer;
@@ -48,8 +50,8 @@ public final class BoardGridView {
         this.rootPane = new Pane();
         this.overlayLayer = new Pane();
         this.overlayLayer.setMouseTransparent(true);
-        this.overlayLayer.setLayoutX(HEADER_SIZE);
-        this.overlayLayer.setLayoutY(HEADER_SIZE);
+        this.overlayLayer.setLayoutX(GRID_ORIGIN);
+        this.overlayLayer.setLayoutY(GRID_ORIGIN);
 
         buildBackground();
         buildHeaders();
@@ -122,8 +124,8 @@ public final class BoardGridView {
         background.getStyleClass().add(BoardTheme.CLASS_BOARD_BACKGROUND);
         background.setArcWidth(BoardTheme.CELL_ARC * 2);
         background.setArcHeight(BoardTheme.CELL_ARC * 2);
-        background.setLayoutX(HEADER_SIZE);
-        background.setLayoutY(HEADER_SIZE);
+        background.setLayoutX(GRID_ORIGIN);
+        background.setLayoutY(GRID_ORIGIN);
         rootPane.getChildren().add(background);
     }
 
@@ -131,7 +133,7 @@ public final class BoardGridView {
         for (int column = 0; column < Coordinate.BOARD_SIZE; column++) {
             char letter = (char) ('A' + column);
             Label label = createHeaderLabel(String.valueOf(letter));
-            label.setLayoutX(HEADER_SIZE + column * BoardTheme.CELL_SIZE);
+            label.setLayoutX(GRID_ORIGIN + column * BoardTheme.CELL_SIZE);
             label.setLayoutY(0);
             label.setPrefWidth(BoardTheme.CELL_SIZE);
             label.setAlignment(Pos.CENTER);
@@ -140,7 +142,7 @@ public final class BoardGridView {
         for (int row = 0; row < Coordinate.BOARD_SIZE; row++) {
             Label label = createHeaderLabel(String.valueOf(row + 1));
             label.setLayoutX(0);
-            label.setLayoutY(HEADER_SIZE + row * BoardTheme.CELL_SIZE);
+            label.setLayoutY(GRID_ORIGIN + row * BoardTheme.CELL_SIZE);
             label.setPrefHeight(BoardTheme.CELL_SIZE);
             label.setAlignment(Pos.CENTER);
             rootPane.getChildren().add(label);
@@ -162,8 +164,8 @@ public final class BoardGridView {
 
                 Point2D origin = getCellOrigin(coordinate);
                 double inset = BoardTheme.CELL_GAP / 2.0;
-                cell.setLayoutX(HEADER_SIZE + origin.getX() + inset);
-                cell.setLayoutY(HEADER_SIZE + origin.getY() + inset);
+                cell.setLayoutX(GRID_ORIGIN + origin.getX() + inset);
+                cell.setLayoutY(GRID_ORIGIN + origin.getY() + inset);
 
                 cellRectangles[row][column] = cell;
                 rootPane.getChildren().add(cell);
@@ -194,8 +196,8 @@ public final class BoardGridView {
         turnIndicator = new Rectangle(size, size);
         turnIndicator.setArcWidth(BoardTheme.CELL_ARC * 2);
         turnIndicator.setArcHeight(BoardTheme.CELL_ARC * 2);
-        turnIndicator.setLayoutX(HEADER_SIZE - margin);
-        turnIndicator.setLayoutY(HEADER_SIZE - margin);
+        turnIndicator.setLayoutX(GRID_ORIGIN - margin);
+        turnIndicator.setLayoutY(GRID_ORIGIN - margin);
         turnIndicator.setMouseTransparent(true);
         turnIndicator.getStyleClass().add(BoardTheme.CLASS_TURN_INDICATOR);
 

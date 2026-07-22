@@ -24,13 +24,13 @@ public final class BoardTheme {
 
     // ---- Board geometry ----------------------------------------------
     /** Full logical size of one cell. Ships and the coordinate grid both use this directly (no gap). */
-    public static final double CELL_SIZE = 42;
+    public static final double CELL_SIZE = 50;
 
     /** Total visual gap perceived between two adjacent water cells (split as half-padding on each cell). */
     public static final double CELL_GAP = 6;
 
     /** Corner radius used for board cells, frigates, and aircraft carrier end caps. */
-    public static final double CELL_ARC = 14;
+    public static final double CELL_ARC = 20;
 
     /** Corner radius used for destroyer/submarine end caps, producing a full semicircle ("capsule") look. */
     public static final double SHIP_CAPSULE_ARC = CELL_SIZE;

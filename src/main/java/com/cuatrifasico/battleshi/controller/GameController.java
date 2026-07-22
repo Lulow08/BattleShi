@@ -35,9 +35,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Controller for {@code game-view.fxml}. Wires the procedurally-built
@@ -52,7 +50,7 @@ import java.util.List;
 public class GameController {
 
     /** Display name used for the computer-controlled opponent. */
-    private static final String MACHINE_NICKNAME = "CPU";
+    private static final String MACHINE_NICKNAME = "OPPONENT";
 
     @FXML
     private Label playerNicknameLabel;
@@ -108,6 +106,9 @@ public class GameController {
     private HumanPlayer humanPlayer;
     private MachinePlayer machinePlayer;
     private GameSession gameSession;
+
+    private final Map<Ship, Group> playerShipNodes = new HashMap<>();
+    private final Map<Ship, Group> opponentShipNodes = new HashMap<>();
 
     /**
      * Buffers the model-level outcome of a shot (human or machine)
@@ -194,7 +195,7 @@ public class GameController {
         this.playerBoard = humanPlayer.getOwnBoard();
 
         for (Ship ship : playerBoard.getFleet()) {
-            renderShipSilhouette(playerBoardView, ship, BoardTheme.CLASS_SHIP_BODY);
+            playerShipNodes.put(ship, (Group) renderShipSilhouette(playerBoardView, ship, BoardTheme.CLASS_SHIP_BODY));
         }
         for (Shot shot : session.getShotHistory()) {
             renderShotMarker(shot);
@@ -203,7 +204,7 @@ public class GameController {
         opponentBoardView.setOnCellClicked(new ShotClickAdapter());
         opponentNicknameLabel.setText(machinePlayer.getNickname());
         viewEnemyButton.setDisable(false);
-        playerBoardView.getRootNode().setDisable(true);
+        playerBoardView.getRootNode().setMouseTransparent(true);
 
         updateTurnIndicators();
 
@@ -224,7 +225,9 @@ public class GameController {
      */
     private void startCombat() {
         playButton.setDisable(true);
-        playerBoardView.getRootNode().setDisable(true);
+        playerBoardView.getRootNode().setMouseTransparent(true);
+
+        playerShipNodes.putAll(placementController.getShipNodes());
 
         humanPlayer = new HumanPlayer(nickname, playerBoard);
         machinePlayer = new MachinePlayer(MACHINE_NICKNAME, new RandomHuntStrategy());
@@ -245,7 +248,7 @@ public class GameController {
             // Extremely unlikely (see RandomFleetPlacer); let the player
             // try again rather than leaving them stuck on a dead button.
             playButton.setDisable(false);
-            playerBoardView.getRootNode().setDisable(false);
+            playerBoardView.getRootNode().setMouseTransparent(false);
             return;
         }
 
@@ -262,7 +265,7 @@ public class GameController {
     //  Human shots                                                        //
     // ------------------------------------------------------------------ //
 
-    /** Reacts to a click on the opponent board: fires the human's shot there. */
+    /** Reacts to a click on the opponent board: fires the human shot there */
     private final class ShotClickAdapter implements EventHandler<MouseEvent> {
         @Override
         public void handle(MouseEvent event) {
@@ -374,10 +377,32 @@ public class GameController {
                 ? MarkerShapeFactory.createMissMarker()
                 : MarkerShapeFactory.createHitMarker();
 
+        if (shot.getResult() == CellState.SUNK) {
+            markShipSunk(shot);
+        }
+
         Point2D origin = targetView.getCellOrigin(shot.getCoordinate());
         marker.setLayoutX(origin.getX());
         marker.setLayoutY(origin.getY());
         targetView.getOverlayLayer().getChildren().add(marker);
+    }
+
+    private void markShipSunk(Shot shot) {
+        Board board = shot.getShooter() == Shot.Shooter.HUMAN
+                ? gameSession.getMachinePlayer().getOwnBoard()
+                : gameSession.getHumanPlayer().getOwnBoard();
+        Ship ship = board.getCell(shot.getCoordinate()).getOccupyingShip();
+        Map<Ship, Group> nodes = shot.getShooter() == Shot.Shooter.HUMAN ? opponentShipNodes : playerShipNodes;
+        BoardGridView view = shot.getShooter() == Shot.Shooter.HUMAN ? opponentBoardView : playerBoardView; // nuevo
+
+        Group node = nodes.get(ship);
+        if (node == null) {
+            node = (Group) renderShipSilhouette(view, ship, BoardTheme.CLASS_SHIP_SUNK); // antes: opponentBoardView fijo
+            nodes.put(ship, node);
+        } else {
+            node.getStyleClass().removeAll(BoardTheme.CLASS_SHIP_BODY, BoardTheme.CLASS_SHIP_SHADOW);
+            node.getStyleClass().add(BoardTheme.CLASS_SHIP_SUNK);
+        }
     }
 
     /** Reflects {@link GameSession#isHumanTurn()} on both boards' turn-indicator borders. */
@@ -385,6 +410,14 @@ public class GameController {
         boolean humanTurn = gameSession.isHumanTurn();
         playerBoardView.setTurnIndicatorActive(humanTurn);
         opponentBoardView.setTurnIndicatorActive(!humanTurn);
+
+        playerNicknameLabel.getStyleClass().removeAll("turn-active");
+        opponentNicknameLabel.getStyleClass().removeAll("turn-active");
+        if (humanTurn) {
+            playerNicknameLabel.getStyleClass().add("turn-active");
+        } else {
+            opponentNicknameLabel.getStyleClass().add("turn-active");
+        }
     }
 
     /**
@@ -396,8 +429,12 @@ public class GameController {
         resultTitleLabel.setText(state == GameState.PLAYER_WON ? "YOU WON" : "YOU LOST");
         resultOverlay.setVisible(true);
         resultOverlay.setManaged(true);
+
         playerBoardView.setTurnIndicatorActive(false);
+        playerNicknameLabel.getStyleClass().removeAll("turn-active");
+
         opponentBoardView.setTurnIndicatorActive(false);
+        opponentNicknameLabel.getStyleClass().removeAll("turn-active");
     }
 
     /**
@@ -520,12 +557,14 @@ public class GameController {
      * @return The created node, so callers can track and remove it later.
      */
     private Node renderShipSilhouette(BoardGridView view, Ship ship, String styleClass) {
-        Group node = ShipShapeFactory.createShipNode(ship.getShipType(), ship.getOrientation(), styleClass);
+        Group node = ShipShapeFactory.createShipNode(ship.getShipType(), ship.getOrientation()); // sin 3er arg -> "ship-body" por defecto
+        node.getStyleClass().add(styleClass); // ship-sunk o ship-shadow, aplicado al Group
         Coordinate head = ship.getOccupiedCells().iterator().next();
         Point2D origin = view.getCellOrigin(head);
         node.setLayoutX(origin.getX());
         node.setLayoutY(origin.getY());
         view.getOverlayLayer().getChildren().add(node);
+        node.toBack();
         return node;
     }
 }

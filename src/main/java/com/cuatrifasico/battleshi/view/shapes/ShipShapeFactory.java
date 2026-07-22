@@ -7,6 +7,11 @@ import javafx.scene.Group;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.scene.shape.ClosePath;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
+import javafx.scene.shape.QuadCurveTo;
 
 /**
  * Builds the JavaFX {@link Group} representing a ship's visual body.
@@ -41,6 +46,8 @@ public final class ShipShapeFactory {
     private ShipShapeFactory() {
         // Utility class, not meant to be instantiated.
     }
+
+    private static final double TAPER_START_RATIO = 1.2;
 
     /**
      * Creates the visual body of a ship, including the darker hit-point
@@ -85,7 +92,7 @@ public final class ShipShapeFactory {
 
     private static Shape createSegmentPiece(int size, int segment, Orientation orientation) {
         if (size == 1) {
-            return createUniformRoundedSquare(BoardTheme.CELL_ARC);
+            return createUniformRoundedSquare(BoardTheme.CELL_ARC * 1.6);
         }
 
         boolean isFirst = segment == 0;
@@ -95,9 +102,11 @@ public final class ShipShapeFactory {
             return new Rectangle(BoardTheme.CELL_SIZE, BoardTheme.CELL_SIZE);
         }
 
-        double endArc = size <= 3 ? BoardTheme.SHIP_CAPSULE_ARC : BoardTheme.CELL_ARC;
         boolean outwardIsLeadingSide = isFirst;
-        return createEndCap(endArc, outwardIsLeadingSide, orientation);
+        if (size <= 3) {
+            return createPointedEndCap(outwardIsLeadingSide, orientation); // antes: createEndCap(SHIP_CAPSULE_ARC, ...)
+        }
+        return createEndCap(BoardTheme.CELL_ARC * 1.6, outwardIsLeadingSide, orientation);
     }
 
     private static Rectangle createUniformRoundedSquare(double arc) {
@@ -158,5 +167,53 @@ public final class ShipShapeFactory {
         Circle dot = new Circle(centerX, centerY, BoardTheme.HIT_DOT_RADIUS);
         dot.getStyleClass().add(BoardTheme.CLASS_SHIP_HIT_DOT);
         return dot;
+    }
+
+    private static Shape createPointedEndCap(boolean outwardIsLeadingSide, Orientation orientation) {
+        double size = BoardTheme.CELL_SIZE;
+        double taperStart = size * TAPER_START_RATIO;
+        Path path = new Path();
+
+        if (orientation == Orientation.HORIZONTAL) {
+            if (outwardIsLeadingSide) {
+                path.getElements().addAll(
+                        new MoveTo(size, 0),
+                        new LineTo(taperStart, 0),
+                        new QuadCurveTo(0, 0, 0, size / 2.0),
+                        new QuadCurveTo(0, size, taperStart, size),
+                        new LineTo(size, size),
+                        new ClosePath());
+            } else {
+                path.getElements().addAll(
+                        new MoveTo(0, 0),
+                        new LineTo(size - taperStart, 0),
+                        new QuadCurveTo(size, 0, size, size / 2.0),
+                        new QuadCurveTo(size, size, size - taperStart, size),
+                        new LineTo(0, size),
+                        new ClosePath());
+            }
+        } else {
+            if (outwardIsLeadingSide) {
+                path.getElements().addAll(
+                        new MoveTo(0, size),
+                        new LineTo(0, taperStart),
+                        new QuadCurveTo(0, 0, size / 2.0, 0),
+                        new QuadCurveTo(size, 0, size, taperStart),
+                        new LineTo(size, size),
+                        new ClosePath());
+            } else {
+                path.getElements().addAll(
+                        new MoveTo(0, 0),
+                        new LineTo(0, size - taperStart),
+                        new QuadCurveTo(0, size, size / 2.0, size),
+                        new QuadCurveTo(size, size, size, size - taperStart),
+                        new LineTo(size, 0),
+                        new ClosePath());
+            }
+        }
+
+        path.setStroke(null);
+
+        return path;
     }
 }

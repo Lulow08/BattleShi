@@ -101,6 +101,8 @@ public final class PlacementController {
         return total;
     }
 
+    Map<Ship, Group> getShipNodes() { return shipNodes; }
+
     // ------------------------------------------------------------------ //
     //  Wiring                                                              //
     // ------------------------------------------------------------------ //

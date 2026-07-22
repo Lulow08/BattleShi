@@ -36,7 +36,7 @@ import javafx.application.Platform;
 public final class MachineTurnThread extends Thread {
 
     /** Simulated "thinking" pause before the machine fires, in milliseconds. */
-    private static final long THINK_DELAY_MS = 900;
+    private static final long THINK_DELAY_MS = 1200;
 
     /**
      * Callback invoked on the JavaFX Application Thread once the

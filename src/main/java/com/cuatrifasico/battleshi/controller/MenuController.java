@@ -21,7 +21,7 @@ import java.io.IOException;
 public class MenuController {
 
     /** Fallback nickname used when no player file has been saved yet. */
-    private static final String DEFAULT_NICKNAME = "Player";
+    private static final String DEFAULT_NICKNAME = "PLAYER";
 
     @FXML
     private Button newGameButton;

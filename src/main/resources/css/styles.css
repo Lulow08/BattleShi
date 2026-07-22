@@ -21,17 +21,17 @@
 /* ---- Board header bars ------------------------------------------------ */
 
 .board-title-bar {
-    -fx-background-radius: 8;
     -fx-padding: 6 0 6 0;
     -fx-alignment: center;
+    -fx-background-insets: 0, 0;
 }
 
 .board-title-bar.player-side {
-    -fx-background-color: -fx-primary-color;
+    -fx-background-color: -fx-text-primary-color, -fx-primary-color;
 }
 
 .board-title-bar.opponent-side {
-    -fx-background-color: -fx-accent-dark-red;
+    -fx-background-color: -fx-text-primary-color, -fx-accent-dark-red;
 }
 
 .board-title-bar.label {
@@ -48,8 +48,8 @@
 
 .board-header-label {
     -fx-text-fill: -fx-text-primary-color;
-    -fx-font-size: 14px;
-    -fx-font-weight: normal;
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
 }
 
 /* ---- Board background & cells ----------------------------------------- */
@@ -67,11 +67,11 @@
     -fx-cursor: hand;
 }
 
-.cell-highlight-valid {
+.cell-water.cell-highlight-valid {
     -fx-fill: -fx-accent-cyan;
 }
 
-.cell-highlight-invalid {
+.cell-water.cell-highlight-invalid {
     -fx-fill: -fx-accent-red;
 }
 
@@ -124,9 +124,7 @@
 }
 
 .board-title-bar.turn-active {
-    -fx-border-color: -fx-text-primary-color;
-    -fx-border-width: 3;
-    -fx-border-radius: 8;
+    -fx-background-insets: 0, 3;
 }
 
 /* ---- Circular icon buttons (restart, play, view, exit) ---------------- */

@@ -35,7 +35,7 @@ public final class ShipTrayView {
         HBox firstRow = buildRow(ShipType.AIRCRAFT_CARRIER, ShipType.SUBMARINE);
         HBox secondRow = buildRow(ShipType.DESTROYER, ShipType.FRIGATE);
 
-        this.rootNode = new VBox(BoardTheme.TRAY_SHIP_SPACING, firstRow, secondRow);
+        this.rootNode = new VBox(BoardTheme.TRAY_SHIP_SPACING * 2, firstRow, secondRow);
         rootNode.setAlignment(Pos.CENTER_LEFT);
     }
 
@@ -59,7 +59,7 @@ public final class ShipTrayView {
 
     private Pane createTrayEntry(ShipType shipType) {
         Group ship = ShipShapeFactory.createShipNode(shipType, Orientation.HORIZONTAL);
-        ship.getStyleClass().add(BoardTheme.CLASS_SHIP_SHADOW);
+        ship.getStyleClass().add(BoardTheme.CLASS_SHIP_BODY);
 
         double width = shipType.getSize() * BoardTheme.CELL_SIZE;
         Pane wrapper = new Pane(ship);
