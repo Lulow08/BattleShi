@@ -29,6 +29,21 @@ public abstract class Player implements Serializable {
     }
 
     /**
+     * Creates a player with the given nickname wrapped around an
+     * already-existing board. Used when the board was built and
+     * populated before the player object itself needed to exist (e.g.
+     * the human's board is filled in during the placement phase,
+     * before a {@code HumanPlayer} is constructed to enter combat).
+     *
+     * @param nickname The display name for this player.
+     * @param ownBoard The board this player will use, as-is.
+     */
+    protected Player(String nickname, Board ownBoard) {
+        this.nickname = nickname;
+        this.ownBoard = ownBoard;
+    }
+
+    /**
      * @return This player's display name.
      */
     public String getNickname() {
