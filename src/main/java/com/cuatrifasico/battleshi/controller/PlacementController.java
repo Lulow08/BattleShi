@@ -78,10 +78,10 @@ public final class PlacementController {
     private Selection selection;
 
     public PlacementController(Board board,
-                                BoardGridView boardView,
-                                ShipTrayView trayView,
-                                Button restartButton,
-                                Button playButton) {
+                               BoardGridView boardView,
+                               ShipTrayView trayView,
+                               Button restartButton,
+                               Button playButton) {
         this.board = board;
         this.boardView = boardView;
         this.restartButton = restartButton;
@@ -305,7 +305,7 @@ public final class PlacementController {
         }
     }
 
-    private void resetPlacement() {
+    void resetPlacement() {
         cancelSelection();
         for (Ship ship : new ArrayList<>(board.getFleet())) {
             removeShipVisualAndModel(ship);
