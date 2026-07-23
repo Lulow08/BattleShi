@@ -226,3 +226,30 @@
     -fx-text-fill: -fx-bg-color;
     -fx-cursor: default;
 }
+
+/* ---- Sprite overlay mode: shapes transparent, PNGs proveen el visual ---- */
+
+.ship-body {
+    -fx-fill: transparent;
+}
+
+.ship-sunk {
+    -fx-fill: transparent;
+}
+
+.ship-hit-dot {
+    -fx-fill: transparent;
+}
+
+.ship-shadow {
+    -fx-fill: transparent;
+    -fx-opacity: 1.0;
+}
+
+.marker-miss {
+    -fx-stroke: transparent;
+}
+
+.marker-hit {
+    -fx-fill: transparent;
+}

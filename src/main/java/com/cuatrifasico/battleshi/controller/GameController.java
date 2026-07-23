@@ -20,6 +20,8 @@ import com.cuatrifasico.battleshi.view.board.BoardTheme;
 import com.cuatrifasico.battleshi.view.board.ShipTrayView;
 import com.cuatrifasico.battleshi.view.shapes.MarkerShapeFactory;
 import com.cuatrifasico.battleshi.view.shapes.ShipShapeFactory;
+import com.cuatrifasico.battleshi.view.board.BoardSpriteLayer;
+import com.cuatrifasico.battleshi.view.shapes.SpriteOverlayFactory;
 
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -33,6 +35,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.image.ImageView;
 
 import java.io.IOException;
 import java.util.*;
@@ -101,6 +104,8 @@ public class GameController {
     private BoardGridView opponentBoardView;
     private Board playerBoard;
     private PlacementController placementController;
+    private BoardSpriteLayer playerSpriteLayer;
+    private BoardSpriteLayer opponentSpriteLayer;
 
     private String nickname;
     private HumanPlayer humanPlayer;
@@ -136,9 +141,11 @@ public class GameController {
     @FXML
     private void initialize() {
         playerBoardView = new BoardGridView();
+        playerSpriteLayer = new BoardSpriteLayer(playerBoardView);
         playerBoardContainer.getChildren().add(playerBoardView.getRootNode());
 
         opponentBoardView = new BoardGridView();
+        opponentSpriteLayer = new BoardSpriteLayer(opponentBoardView);
         opponentBoardContainer.getChildren().add(opponentBoardView.getRootNode());
 
         ShipTrayView fleetTray = new ShipTrayView();
@@ -146,7 +153,7 @@ public class GameController {
 
         playerBoard = new Board();
         placementController = new PlacementController(
-                playerBoard, playerBoardView, fleetTray, restartButton, playButton);
+                playerBoard, playerBoardView, fleetTray, restartButton, playButton, playerSpriteLayer);
 
         // PlacementController wires restartButton to resetPlacement() in its
         // own constructor. We take over that button here so restart keeps
@@ -385,6 +392,13 @@ public class GameController {
         marker.setLayoutX(origin.getX());
         marker.setLayoutY(origin.getY());
         targetView.getOverlayLayer().getChildren().add(marker);
+
+        BoardSpriteLayer spriteLayer = shot.getShooter() == Shot.Shooter.HUMAN ? opponentSpriteLayer : playerSpriteLayer;
+        if (shot.getResult() == CellState.MISS) {
+            spriteLayer.addMissMarker(shot.getCoordinate());
+        } else if (shot.getResult() == CellState.HIT) {
+            spriteLayer.addHitMarker(shot.getCoordinate());
+        }
     }
 
     private void markShipSunk(Shot shot) {
@@ -403,6 +417,13 @@ public class GameController {
             node.getStyleClass().removeAll(BoardTheme.CLASS_SHIP_BODY, BoardTheme.CLASS_SHIP_SHADOW);
             node.getStyleClass().add(BoardTheme.CLASS_SHIP_SUNK);
         }
+
+        BoardSpriteLayer spriteLayer = shot.getShooter() == Shot.Shooter.HUMAN ? opponentSpriteLayer : playerSpriteLayer;
+        for (Coordinate cell : ship.getOccupiedCells()) {
+            spriteLayer.removeMarker(cell);
+        }
+        Coordinate head = ship.getOccupiedCells().iterator().next();
+        spriteLayer.revealSunkShip(ship, head);
     }
 
     /** Reflects {@link GameSession#isHumanTurn()} on both boards' turn-indicator borders. */
@@ -529,8 +550,20 @@ public class GameController {
             enemyFleetPreviewNodes.clear();
         } else {
             for (Ship ship : machinePlayer.getOwnBoard().getFleet()) {
-                enemyFleetPreviewNodes.add(
-                        renderShipSilhouette(opponentBoardView, ship, BoardTheme.CLASS_SHIP_SHADOW));
+                if (!ship.isSunk()) {
+                    enemyFleetPreviewNodes.add(
+                            renderShipSilhouette(opponentBoardView, ship, BoardTheme.CLASS_SHIP_SHADOW));
+                    Coordinate head = ship.getOccupiedCells().iterator().next();
+                    ImageView sprite = SpriteOverlayFactory.createShipOverlay(ship.getShipType(), ship.getOrientation());
+                    sprite.setOpacity(0.45);
+                    sprite.setMouseTransparent(true);
+                    opponentBoardView.getCellOrigin(head);
+                    Point2D origin = opponentBoardView.getCellOrigin(head);
+                    sprite.setTranslateX(origin.getX());
+                    sprite.setTranslateY(origin.getY());
+                    opponentBoardView.getOverlayLayer().getChildren().add(sprite);
+                    enemyFleetPreviewNodes.add(sprite);
+                }
             }
         }
         enemyFleetPreviewVisible = !enemyFleetPreviewVisible;
@@ -565,6 +598,14 @@ public class GameController {
         node.setLayoutY(origin.getY());
         view.getOverlayLayer().getChildren().add(node);
         node.toBack();
+
+        BoardSpriteLayer spriteLayer = view == playerBoardView ? playerSpriteLayer : opponentSpriteLayer;
+        if (styleClass.equals(BoardTheme.CLASS_SHIP_SUNK)) {
+            spriteLayer.revealSunkShip(ship, head);
+        } else if (styleClass.equals(BoardTheme.CLASS_SHIP_BODY)) {
+            spriteLayer.addShipOverlay(ship, head);
+        }
+
         return node;
     }
 }

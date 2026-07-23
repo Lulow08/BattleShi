@@ -3,12 +3,14 @@ package com.cuatrifasico.battleshi.view.board;
 import com.cuatrifasico.battleshi.model.enums.Orientation;
 import com.cuatrifasico.battleshi.model.enums.ShipType;
 import com.cuatrifasico.battleshi.view.shapes.ShipShapeFactory;
-import com.cuatrifasico.battleshi.view.board.BoardTheme;
+import com.cuatrifasico.battleshi.view.shapes.SpriteOverlayFactory;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 
 /**
  * Builds the fleet tray shown below the player's board, listing every
@@ -57,13 +59,21 @@ public final class ShipTrayView {
         return row;
     }
 
-    private Pane createTrayEntry(ShipType shipType) {
-        Group ship = ShipShapeFactory.createShipNode(shipType, Orientation.HORIZONTAL);
-        ship.getStyleClass().add(BoardTheme.CLASS_SHIP_BODY);
-
+    private StackPane createTrayEntry(ShipType shipType) {
         double width = shipType.getSize() * BoardTheme.CELL_SIZE;
-        Pane wrapper = new Pane(ship);
-        wrapper.setPrefSize(width, BoardTheme.CELL_SIZE);
-        return wrapper;
+
+        Group shipShape = ShipShapeFactory.createShipNode(shipType, Orientation.HORIZONTAL);
+        shipShape.getStyleClass().add(BoardTheme.CLASS_SHIP_SHADOW);
+        Pane shapeWrapper = new Pane(shipShape);
+        shapeWrapper.setPrefSize(width, BoardTheme.CELL_SIZE);
+
+        ImageView sprite = SpriteOverlayFactory.createShipOverlay(shipType, Orientation.HORIZONTAL, false);
+        sprite.setOpacity(0.45);
+        sprite.setMouseTransparent(true);
+
+        StackPane entry = new StackPane(shapeWrapper, sprite);
+        entry.setPrefSize(width, BoardTheme.CELL_SIZE);
+        entry.setAlignment(Pos.TOP_LEFT);
+        return entry;
     }
 }
