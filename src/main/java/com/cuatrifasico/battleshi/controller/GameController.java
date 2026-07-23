@@ -597,23 +597,29 @@ public class GameController {
         if (enemyFleetPreviewVisible) {
             opponentBoardView.getOverlayLayer().getChildren().removeAll(enemyFleetPreviewNodes);
             enemyFleetPreviewNodes.clear();
+            for (Ship ship : machinePlayer.getOwnBoard().getFleet()) {
+                if (!ship.isSunk()) {
+                    opponentSpriteLayer.removeShipOverlay(ship);
+                }
+            }
         } else {
 
             for (Ship ship : machinePlayer.getOwnBoard().getFleet()) {
 
                 if (!ship.isSunk()) {
 
-                    Node previewNode =
-                            renderShipSilhouette(
-                                    opponentBoardView,
-                                    ship,
-                                    BoardTheme.CLASS_SHIP_BODY);
-
-                    previewNode.getStyleClass().add(BoardTheme.CLASS_SHIP_SHADOW);
-
-                    enemyFleetPreviewNodes.add(previewNode);
+                    Group shapeNode = ShipShapeFactory.createShipNode(
+                            ship.getShipType(), ship.getOrientation(), BoardTheme.CLASS_SHIP_BODY
+                    );
+                    shapeNode.getStyleClass().add(BoardTheme.CLASS_SHIP_SHADOW);
 
                     Coordinate head = ship.getOccupiedCells().iterator().next();
+                    Point2D origin = opponentBoardView.getCellOrigin(head);
+                    shapeNode.setLayoutX(origin.getX());
+                    shapeNode.setLayoutY(origin.getY());
+                    opponentBoardView.getOverlayLayer().getChildren().add(shapeNode);
+                    shapeNode.toBack();
+                    enemyFleetPreviewNodes.add(shapeNode);
 
                     ImageView sprite =
                             SpriteOverlayFactory.createShipOverlay(
@@ -623,7 +629,6 @@ public class GameController {
                     sprite.setOpacity(0.45);
                     sprite.setMouseTransparent(true);
 
-                    Point2D origin = opponentBoardView.getCellOrigin(head);
 
                     sprite.setTranslateX(origin.getX());
                     sprite.setTranslateY(origin.getY());
