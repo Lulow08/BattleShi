@@ -9,6 +9,7 @@ import com.cuatrifasico.battleshi.model.exceptions.InvalidPlacementException;
 import com.cuatrifasico.battleshi.view.board.BoardGridView;
 import com.cuatrifasico.battleshi.view.board.ShipTrayView;
 import com.cuatrifasico.battleshi.view.shapes.ShipShapeFactory;
+import com.cuatrifasico.battleshi.view.board.BoardSpriteLayer;
 
 import javafx.animation.PauseTransition;
 import javafx.event.EventHandler;
@@ -58,6 +59,7 @@ public final class PlacementController {
     private final BoardGridView boardView;
     private final Button restartButton;
     private final Button playButton;
+    private final BoardSpriteLayer spriteLayer;
 
     private static final int TOTAL_FLEET_SIZE = totalFleetSize();
 
@@ -81,11 +83,13 @@ public final class PlacementController {
                                BoardGridView boardView,
                                ShipTrayView trayView,
                                Button restartButton,
-                               Button playButton) {
+                               Button playButton,
+                               BoardSpriteLayer spriteLayer) {
         this.board = board;
         this.boardView = boardView;
         this.restartButton = restartButton;
         this.playButton = playButton;
+        this.spriteLayer = spriteLayer;
 
         wireTray(trayView);
         wireBoard();
@@ -335,6 +339,7 @@ public final class PlacementController {
         node.setLayoutY(origin.getY());
         boardView.getOverlayLayer().getChildren().add(node);
         shipNodes.put(ship, node);
+        spriteLayer.addShipOverlay(ship, head);
     }
 
     private void removeShipVisualAndModel(Ship ship) {
@@ -342,6 +347,7 @@ public final class PlacementController {
         if (node != null) {
             boardView.getOverlayLayer().getChildren().remove(node);
         }
+        spriteLayer.removeShipOverlay(ship);
         board.removeShip(ship);
     }
 

@@ -20,6 +20,8 @@ import com.cuatrifasico.battleshi.view.board.BoardTheme;
 import com.cuatrifasico.battleshi.view.board.ShipTrayView;
 import com.cuatrifasico.battleshi.view.shapes.MarkerShapeFactory;
 import com.cuatrifasico.battleshi.view.shapes.ShipShapeFactory;
+import com.cuatrifasico.battleshi.view.board.BoardSpriteLayer;
+import com.cuatrifasico.battleshi.view.shapes.SpriteOverlayFactory;
 
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -83,6 +85,12 @@ public class GameController {
     private Button exitButton;
 
     @FXML
+    private StackPane instructionsOverlay;
+
+    @FXML
+    private Button instructionsOkButton;
+
+    @FXML
     private StackPane resultOverlay;
 
     @FXML
@@ -94,8 +102,7 @@ public class GameController {
     @FXML
     private Button resultReplayButton;
 
-    @FXML
-    private StackPane instructionsOverlay;
+
 
 
     @FXML
@@ -110,14 +117,13 @@ public class GameController {
     @FXML
     private Button nextInstructionButton;
 
-    @FXML
-    private Button instructionsOkButton;
-
 
     private BoardGridView playerBoardView;
     private BoardGridView opponentBoardView;
     private Board playerBoard;
     private PlacementController placementController;
+    private BoardSpriteLayer playerSpriteLayer;
+    private BoardSpriteLayer opponentSpriteLayer;
 
     private String nickname;
     private HumanPlayer humanPlayer;
@@ -164,9 +170,11 @@ public class GameController {
     @FXML
     private void initialize() {
         playerBoardView = new BoardGridView();
+        playerSpriteLayer = new BoardSpriteLayer(playerBoardView);
         playerBoardContainer.getChildren().add(playerBoardView.getRootNode());
 
         opponentBoardView = new BoardGridView();
+        opponentSpriteLayer = new BoardSpriteLayer(opponentBoardView);
         opponentBoardContainer.getChildren().add(opponentBoardView.getRootNode());
 
         ShipTrayView fleetTray = new ShipTrayView();
@@ -174,7 +182,7 @@ public class GameController {
 
         playerBoard = new Board();
         placementController = new PlacementController(
-                playerBoard, playerBoardView, fleetTray, restartButton, playButton);
+                playerBoard, playerBoardView, fleetTray, restartButton, playButton, playerSpriteLayer);
 
         // PlacementController wires restartButton to resetPlacement() in its
         // own constructor. We take over that button here so restart keeps
@@ -415,6 +423,13 @@ public class GameController {
         marker.setLayoutX(origin.getX());
         marker.setLayoutY(origin.getY());
         targetView.getOverlayLayer().getChildren().add(marker);
+
+        BoardSpriteLayer spriteLayer = shot.getShooter() == Shot.Shooter.HUMAN ? opponentSpriteLayer : playerSpriteLayer;
+        if (shot.getResult() == CellState.MISS) {
+            spriteLayer.addMissMarker(shot.getCoordinate());
+        } else if (shot.getResult() == CellState.HIT) {
+            spriteLayer.addHitMarker(shot.getCoordinate());
+        }
     }
 
     private void markShipSunk(Shot shot) {
@@ -432,12 +447,29 @@ public class GameController {
         } else {
             recolorShip(node, BoardTheme.CLASS_SHIP_SUNK);
         }
+        BoardSpriteLayer spriteLayer =
+                shot.getShooter() == Shot.Shooter.HUMAN
+                        ? opponentSpriteLayer
+                        : playerSpriteLayer;
+
+        for (Coordinate cell : ship.getOccupiedCells()) {
+            spriteLayer.removeMarker(cell);
+        }
+
+        Coordinate head = ship.getOccupiedCells().iterator().next();
+        spriteLayer.revealSunkShip(ship, head);
     }
 
     private void recolorShip(Group shipNode, String newFillClass) {
         for (Node child : shipNode.getChildren()) {
-            if (child instanceof Shape shape && !shape.getStyleClass().contains(BoardTheme.CLASS_SHIP_HIT_DOT)) {
-                shape.getStyleClass().removeAll(BoardTheme.CLASS_SHIP_BODY, BoardTheme.CLASS_SHIP_SUNK, BoardTheme.CLASS_SHIP_SHADOW);
+            if (child instanceof Shape shape
+                    && !shape.getStyleClass().contains(BoardTheme.CLASS_SHIP_HIT_DOT)) {
+
+                shape.getStyleClass().removeAll(
+                        BoardTheme.CLASS_SHIP_BODY,
+                        BoardTheme.CLASS_SHIP_SUNK,
+                        BoardTheme.CLASS_SHIP_SHADOW);
+
                 shape.getStyleClass().add(newFillClass);
             }
         }
@@ -561,19 +593,49 @@ public class GameController {
         if (machinePlayer == null) {
             return;
         }
+
         if (enemyFleetPreviewVisible) {
             opponentBoardView.getOverlayLayer().getChildren().removeAll(enemyFleetPreviewNodes);
             enemyFleetPreviewNodes.clear();
         } else {
+
             for (Ship ship : machinePlayer.getOwnBoard().getFleet()) {
-                Node previewNode = renderShipSilhouette(opponentBoardView, ship, BoardTheme.CLASS_SHIP_BODY);
-                previewNode.getStyleClass().add(BoardTheme.CLASS_SHIP_SHADOW);
-                enemyFleetPreviewNodes.add(previewNode);
+
+                if (!ship.isSunk()) {
+
+                    Node previewNode =
+                            renderShipSilhouette(
+                                    opponentBoardView,
+                                    ship,
+                                    BoardTheme.CLASS_SHIP_BODY);
+
+                    previewNode.getStyleClass().add(BoardTheme.CLASS_SHIP_SHADOW);
+
+                    enemyFleetPreviewNodes.add(previewNode);
+
+                    Coordinate head = ship.getOccupiedCells().iterator().next();
+
+                    ImageView sprite =
+                            SpriteOverlayFactory.createShipOverlay(
+                                    ship.getShipType(),
+                                    ship.getOrientation());
+
+                    sprite.setOpacity(0.45);
+                    sprite.setMouseTransparent(true);
+
+                    Point2D origin = opponentBoardView.getCellOrigin(head);
+
+                    sprite.setTranslateX(origin.getX());
+                    sprite.setTranslateY(origin.getY());
+
+                    opponentBoardView.getOverlayLayer().getChildren().add(sprite);
+                    enemyFleetPreviewNodes.add(sprite);
+                }
             }
         }
+
         enemyFleetPreviewVisible = !enemyFleetPreviewVisible;
     }
-
     private void loadInstructionPages() {
         int page = 1;
         while (true) {
@@ -666,7 +728,6 @@ public class GameController {
         );
 
     }
-
     private void hideInstructionsOverlay() {
         instructionsOverlay.setVisible(false);
         instructionsOverlay.setManaged(false);
@@ -681,6 +742,11 @@ public class GameController {
      * same placement-origin math {@link PlacementController} uses for
      * live placement. Reused for repainting an already-placed human
      * fleet on resume, and for the enemy fleet debug preview.
+     *
+     * @param view       The board view to draw on.
+     * @param ship       The ship to render.
+     * @param fillStyleClass The fill style class (normal body vs. shadow preview).
+     * @return The created node, so callers can track and remove it later.
      */
     private Node renderShipSilhouette(BoardGridView view, Ship ship, String fillStyleClass) {
         Group node = ShipShapeFactory.createShipNode(ship.getShipType(), ship.getOrientation(), fillStyleClass);
@@ -690,6 +756,14 @@ public class GameController {
         node.setLayoutY(origin.getY());
         view.getOverlayLayer().getChildren().add(node);
         node.toBack();
+
+        BoardSpriteLayer spriteLayer = view == playerBoardView ? playerSpriteLayer : opponentSpriteLayer;
+        if (fillStyleClass.equals(BoardTheme.CLASS_SHIP_SUNK)) {
+            spriteLayer.revealSunkShip(ship, head);
+        } else if (fillStyleClass.equals(BoardTheme.CLASS_SHIP_BODY)) {
+            spriteLayer.addShipOverlay(ship, head);
+        }
+
         return node;
     }
 }
