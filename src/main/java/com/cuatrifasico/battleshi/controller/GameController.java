@@ -33,6 +33,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.shape.Shape;
 
 import java.io.IOException;
 import java.util.*;
@@ -80,12 +83,6 @@ public class GameController {
     private Button exitButton;
 
     @FXML
-    private StackPane instructionsOverlay;
-
-    @FXML
-    private Button instructionsOkButton;
-
-    @FXML
     private StackPane resultOverlay;
 
     @FXML
@@ -96,6 +93,26 @@ public class GameController {
 
     @FXML
     private Button resultReplayButton;
+
+    @FXML
+    private StackPane instructionsOverlay;
+
+
+    @FXML
+    private StackPane instructionsCard;
+
+    @FXML
+    private ImageView instructionsImage;
+
+    @FXML
+    private Button previousInstructionButton;
+
+    @FXML
+    private Button nextInstructionButton;
+
+    @FXML
+    private Button instructionsOkButton;
+
 
     private BoardGridView playerBoardView;
     private BoardGridView opponentBoardView;
@@ -128,6 +145,17 @@ public class GameController {
     /** Debug-only ship previews currently shown for {@link #viewEnemyButton}. */
     private final List<Node> enemyFleetPreviewNodes = new ArrayList<>();
     private boolean enemyFleetPreviewVisible = false;
+
+    /**
+     * Tutorial pages shown in the instructions overlay.
+     * Only one ImageView is reused for every page.
+     */
+    private final List<Image> instructionPages = new ArrayList<>();
+
+    /**
+     * Zero-based index of the currently visible tutorial page.
+     */
+    private int currentInstructionPage;
 
     /**
      * Called automatically by the FXML loader once every {@code @FXML}
@@ -163,6 +191,8 @@ public class GameController {
         resultReplayButton.setOnAction(event -> reloadFreshGame());
 
         instructionsOkButton.setOnAction(event -> hideInstructionsOverlay());
+
+        initializeInstructionsCarousel();
     }
 
     /**
@@ -341,7 +371,7 @@ public class GameController {
 
     /**
      * Drains {@link #turnQueue}, painting a marker for every buffered
-     * shot, then autosaves, refreshes the turn indicators, shows the
+     * shot, then auto saves, refreshes the turn indicators, shows the
      * result overlay if the match just ended, or spawns the next
      * {@link MachineTurnThread} if it is now the machine's turn.
      */
@@ -393,15 +423,23 @@ public class GameController {
                 : gameSession.getHumanPlayer().getOwnBoard();
         Ship ship = board.getCell(shot.getCoordinate()).getOccupyingShip();
         Map<Ship, Group> nodes = shot.getShooter() == Shot.Shooter.HUMAN ? opponentShipNodes : playerShipNodes;
-        BoardGridView view = shot.getShooter() == Shot.Shooter.HUMAN ? opponentBoardView : playerBoardView; // nuevo
+        BoardGridView view = shot.getShooter() == Shot.Shooter.HUMAN ? opponentBoardView : playerBoardView;
 
         Group node = nodes.get(ship);
         if (node == null) {
-            node = (Group) renderShipSilhouette(view, ship, BoardTheme.CLASS_SHIP_SUNK); // antes: opponentBoardView fijo
+            node = (Group) renderShipSilhouette(view, ship, BoardTheme.CLASS_SHIP_SUNK);
             nodes.put(ship, node);
         } else {
-            node.getStyleClass().removeAll(BoardTheme.CLASS_SHIP_BODY, BoardTheme.CLASS_SHIP_SHADOW);
-            node.getStyleClass().add(BoardTheme.CLASS_SHIP_SUNK);
+            recolorShip(node, BoardTheme.CLASS_SHIP_SUNK);
+        }
+    }
+
+    private void recolorShip(Group shipNode, String newFillClass) {
+        for (Node child : shipNode.getChildren()) {
+            if (child instanceof Shape shape && !shape.getStyleClass().contains(BoardTheme.CLASS_SHIP_HIT_DOT)) {
+                shape.getStyleClass().removeAll(BoardTheme.CLASS_SHIP_BODY, BoardTheme.CLASS_SHIP_SUNK, BoardTheme.CLASS_SHIP_SHADOW);
+                shape.getStyleClass().add(newFillClass);
+            }
         }
     }
 
@@ -438,7 +476,7 @@ public class GameController {
     }
 
     /**
-     * Autosaves after every move (human or machine), per the project's
+     * Auto saves after every move (human or machine), per the project's
      * HU-5: while the match is {@link GameState#IN_PROGRESS} the
      * session is written to disk; once it ends, the save is deleted so
      * "Continue Game" is disabled on the next launch. A no-op before
@@ -515,8 +553,7 @@ public class GameController {
     }
 
     /**
-     * Toggles the debug-only preview of the machine's full fleet (HU-3:
-     * "para fines de verificación"), showing/hiding translucent ship
+     * Toggles the debug-only preview of the machine's full fleet, showing/hiding translucent ship
      * silhouettes on the opponent board without affecting game rules.
      * Disabled until the machine's fleet actually exists.
      */
@@ -529,11 +566,105 @@ public class GameController {
             enemyFleetPreviewNodes.clear();
         } else {
             for (Ship ship : machinePlayer.getOwnBoard().getFleet()) {
-                enemyFleetPreviewNodes.add(
-                        renderShipSilhouette(opponentBoardView, ship, BoardTheme.CLASS_SHIP_SHADOW));
+                Node previewNode = renderShipSilhouette(opponentBoardView, ship, BoardTheme.CLASS_SHIP_BODY);
+                previewNode.getStyleClass().add(BoardTheme.CLASS_SHIP_SHADOW);
+                enemyFleetPreviewNodes.add(previewNode);
             }
         }
         enemyFleetPreviewVisible = !enemyFleetPreviewVisible;
+    }
+
+    private void loadInstructionPages() {
+        int page = 1;
+        while (true) {
+            try {
+                String resource = "/images/" + page + ".png";
+                instructionPages.add(
+                        new Image(Objects.requireNonNull(getClass().getResource(resource)).toExternalForm())
+                );
+                page++;
+            } catch (NullPointerException ignored) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * Initializes the tutorial carousel.
+     *
+     * <p>The instructions overlay uses a single ImageView that is
+     * updated when the player changes pages. The content is clipped
+     * using a rounded rectangle so the images perfectly match the
+     * overlay card while keeping the border visible.</p>
+     */
+    private void initializeInstructionsCarousel() {
+
+        Rectangle clip = new Rectangle(742, 580);
+        clip.setArcWidth(28);
+        clip.setArcHeight(28);
+
+        instructionsCard.setClip(clip);
+
+        loadInstructionPages();
+
+        previousInstructionButton.setOnAction(event -> showPreviousInstruction());
+
+        nextInstructionButton.setOnAction(event -> showNextInstruction());
+
+        instructionsOkButton.setOnAction(event -> hideInstructionsOverlay());
+
+        if (!instructionPages.isEmpty()) {
+            instructionsImage.setImage(instructionPages.get(0));
+        }
+
+    }
+
+    /**
+     * Displays the previous tutorial page.
+     *
+     * <p>The carousel wraps to the last page when the
+     * first page is reached.</p>
+     */
+    private void showPreviousInstruction() {
+
+        if (instructionPages.isEmpty()) {
+            return;
+        }
+
+        currentInstructionPage--;
+
+        if (currentInstructionPage < 0) {
+            currentInstructionPage = instructionPages.size() - 1;
+        }
+
+        instructionsImage.setImage(
+                instructionPages.get(currentInstructionPage)
+        );
+
+    }
+
+    /**
+     * Displays the next tutorial page.
+     *
+     * <p>The carousel wraps back to the first page after
+     * the last one.</p>
+     */
+    private void showNextInstruction() {
+
+        if (instructionPages.isEmpty()) {
+            return;
+        }
+
+        currentInstructionPage++;
+
+        if (currentInstructionPage >= instructionPages.size()) {
+            currentInstructionPage = 0;
+        }
+
+        instructionsImage.setImage(
+                instructionPages.get(currentInstructionPage)
+        );
+
     }
 
     private void hideInstructionsOverlay() {
@@ -550,15 +681,9 @@ public class GameController {
      * same placement-origin math {@link PlacementController} uses for
      * live placement. Reused for repainting an already-placed human
      * fleet on resume, and for the enemy fleet debug preview.
-     *
-     * @param view       The board view to draw on.
-     * @param ship       The ship to render.
-     * @param styleClass The fill style class (normal body vs. shadow preview).
-     * @return The created node, so callers can track and remove it later.
      */
-    private Node renderShipSilhouette(BoardGridView view, Ship ship, String styleClass) {
-        Group node = ShipShapeFactory.createShipNode(ship.getShipType(), ship.getOrientation()); // sin 3er arg -> "ship-body" por defecto
-        node.getStyleClass().add(styleClass); // ship-sunk o ship-shadow, aplicado al Group
+    private Node renderShipSilhouette(BoardGridView view, Ship ship, String fillStyleClass) {
+        Group node = ShipShapeFactory.createShipNode(ship.getShipType(), ship.getOrientation(), fillStyleClass);
         Coordinate head = ship.getOccupiedCells().iterator().next();
         Point2D origin = view.getCellOrigin(head);
         node.setLayoutX(origin.getX());
