@@ -1,0 +1,13 @@
+module:com.cuatrifasico.battleshi
+com.cuatrifasico.battleshi
+com.cuatrifasico.battleshi.controller
+com.cuatrifasico.battleshi.model
+com.cuatrifasico.battleshi.model.concurrency
+com.cuatrifasico.battleshi.model.entities
+com.cuatrifasico.battleshi.model.enums
+com.cuatrifasico.battleshi.model.exceptions
+com.cuatrifasico.battleshi.model.persistence
+com.cuatrifasico.battleshi.model.strategy
+com.cuatrifasico.battleshi.view
+com.cuatrifasico.battleshi.view.board
+com.cuatrifasico.battleshi.view.shapes
