@@ -242,7 +242,7 @@ mvn test
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/cuatrifasico/battleshi.git
+git clone https://github.com/Lulow08/BattleShi.git
 cd battleshi
 
 # Ejecutar la aplicación
