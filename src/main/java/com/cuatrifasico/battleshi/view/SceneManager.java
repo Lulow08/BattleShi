@@ -9,7 +9,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Objects;
 
 /**
  * Singleton class responsible for managing the primary JavaFX {@link Stage}
@@ -50,6 +49,7 @@ public final class SceneManager {
     public void loadFonts() {
         Font.loadFont(getClass().getResourceAsStream("/fonts/BDOGrotesk-VF.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("/fonts/SF-Pro.ttf"), 14);
+        Font.loadFont(getClass().getResourceAsStream("/fonts/ITC-Machine.otf"), 14);
     }
 
     /**
